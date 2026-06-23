@@ -1,43 +1,33 @@
 import { useState } from "react";
-import { supabase } from "../supabase/client";
+import { useTasks, adding } from "../context/TaskContext";
 
 function TaskForm() {
   const [taskName, setTaskName] = useState("");
+  const { createTask, adding } = useTasks();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(taskName);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const result = await supabase
-        .from("tasks")
-        .insert({ name: taskName, userId: user.id })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error adding task:", error);
-          } else {
-            console.log("Task added:", data);
-            setTaskName("");
-          }
-        });
-      console.log(result);
-    } catch (error) {}
+    createTask(taskName);
+    setTaskName("");
   };
 
   return (
-    <div>
-      <h2>Add Task</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="taskName"
-          placeholder="Task title"
-          value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
-        />
-        <button type="submit">Add Task</button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} classsName="card card-body">
+      <input
+        type="text"
+        name="taskName"
+        placeholder="Task title"
+        value={taskName}
+        onChange={(e) => setTaskName(e.target.value)}
+        className="form-control mb-2"
+      />
+      <div className="ms-auto">
+        <button disabled={adding} className="btn btn-primary btn-sm">
+          {adding ? "Adding..." : "Add Task"}
+        </button>
+      </div>
+    </form>
   );
 }
 
